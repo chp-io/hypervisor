@@ -134,7 +134,7 @@ vcpu::vcpu(
     m_ist1{std::make_unique<gsl::byte[]>(STACK_SIZE * 2)},
     m_stack{std::make_unique<gsl::byte[]>(STACK_SIZE * 2)},
 
-    m_vmx{is_root_vcpu() ? std::make_unique<vmx>() : nullptr},
+    m_vmx{is_host_vm_vcpu() ? std::make_unique<vmx>() : nullptr},
 
     m_vmcs{this},
     m_exit_handler{this},
@@ -189,7 +189,7 @@ vcpu::vcpu(
     this->write_host_state();
     this->write_control_state();
 
-    if (this->is_root_vcpu()) {
+    if (this->is_host_vm_vcpu()) {
         this->write_guest_state();
     }
 
@@ -376,7 +376,7 @@ vcpu::write_control_state()
 
     activate_secondary_controls::enable_if_allowed();
 
-    if (this->is_root_vcpu()) {
+    if (this->is_host_vm_vcpu()) {
         enable_rdtscp::enable_if_allowed();
         enable_invpcid::enable_if_allowed();
         enable_xsaves_xrstors::enable_if_allowed();
